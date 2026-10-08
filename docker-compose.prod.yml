@@ -1,0 +1,45 @@
+# EC2 배포용 — MySQL(Docker) + Backend(Docker). 프론트는 Vercel.
+# 사용: docker compose -p chatapp -f docker-compose.prod.yml up -d --build
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: chat-mysql
+    restart: unless-stopped
+    mem_limit: 420m
+    mem_reservation: 250m
+    command: --innodb-buffer-pool-size=96M --performance-schema=off --skip-log-bin
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD 필요}
+      MYSQL_DATABASE: chatdb
+      MYSQL_USER: chatuser
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?MYSQL_PASSWORD 필요}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uchatuser", "-p${MYSQL_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    image: chatapp-backend:latest
+    container_name: chat-backend
+    restart: unless-stopped
+    mem_limit: 450m
+    mem_reservation: 300m
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/chatdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: chatuser
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:?MYSQL_PASSWORD 필요}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET 필요 (32자 이상 랜덤)}
+      JAVA_TOOL_OPTIONS: -Xmx280m
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  mysql-data:
