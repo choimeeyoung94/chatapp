@@ -21,6 +21,12 @@ public class DataSeeder {
     @Bean
     CommandLineRunner seed() {
         return args -> {
+            // pipeline test 2026-10-09: no-op (full chain verify)
+            seedData();
+        };
+    }
+
+    private void seedData() {
             User u1 = userRepository.findByUsername("user1").orElseGet(() ->
                 userRepository.save(User.builder().username("user1")
                     .passwordHash(passwordEncoder.encode("1234")).nickname("홍길동")
@@ -39,6 +45,5 @@ public class DataSeeder {
                 memberRepository.save(ChatRoomMember.builder().room(room).user(u1).role("OWNER").build());
                 memberRepository.save(ChatRoomMember.builder().room(room).user(u2).role("MEMBER").build());
             }
-        };
     }
 }
