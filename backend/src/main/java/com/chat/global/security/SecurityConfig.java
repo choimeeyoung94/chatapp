@@ -47,7 +47,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsSource() {
         CorsConfiguration c = new CorsConfiguration();
-        c.setAllowedOriginPatterns(List.of("*"));
+        // 운영 오리진만 허용 (Vercel 배포물 + 로컬 개발)
+        c.setAllowedOriginPatterns(List.of("https://*.vercel.app", "http://localhost:*"));
         c.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         c.setAllowedHeaders(List.of("*"));
         c.setAllowCredentials(true);

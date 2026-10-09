@@ -22,7 +22,7 @@ services:
       retries: 10
 
   backend:
-    image: chatapp-backend:latest
+    image: ghcr.io/choimeeyoung94/chatapp-backend:latest
     container_name: chat-backend
     restart: unless-stopped
     mem_limit: 450m
